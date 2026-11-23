@@ -172,8 +172,8 @@ window.HELP = [
     'O cronômetro da Kick usa o tempo que o próprio jogo mostra quando uma conta do PokeIdle está aberta no app.',
   ]],
   ['App', 'Fechei a janela e o app continuou rodando?', [
-    'Sim, de propósito: ele fica na bandeja, perto do relógio, juntando pontos e com as contas conectadas.',
-    'Para sair de vez: botão direito no ícone > Sair, ou Ajustes > Sair do app.',
+    'Sim, de propósito: ele fica na bandeja (no Mac, na barra de menus), perto do relógio, juntando pontos e com as contas conectadas.',
+    'Para sair de vez: botão direito no ícone (no Mac, clique) > Sair, ou Ajustes > Sair do app.',
   ]],
   ['Vigia e avisos', 'Como recebo aviso no celular quando uma conta para?', [
     '1. Ajustes > Vigia e avisos: ligue "Aviso no celular (ntfy)".',

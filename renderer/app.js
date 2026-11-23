@@ -105,7 +105,7 @@ function renderUpdateBar() {
     const b = button('Atualizar agora', 'primary', async () => { b.disabled = true; b.textContent = 'Atualizando…'; await call('app:update:install'); });
     bar.append(el('span', 'ub-ico', '✦'), txt, b);
   } else {
-    txt.append(el('b', null, `Nova versão ${u.version} disponível`), el('span', null, S.app && S.app.platform === 'darwin' ? 'No Mac o app não se atualiza sozinho: atualize o código e rode o script de build de novo (veja MAC.md).' : 'Esta versão (portátil ou .deb) não se atualiza sozinha: baixe a nova no site.'));
+    txt.append(el('b', null, `Nova versão ${u.version} disponível`), el('span', null, S.app && S.app.platform === 'darwin' ? 'No Mac o app não se atualiza sozinho: gere a versão nova no GitHub Actions ou com o script de build (veja MAC.md).' : 'Esta versão (portátil ou .deb) não se atualiza sozinha: baixe a nova no site.'));
     bar.append(el('span', 'ub-ico', '✦'), txt, button(S.app && S.app.platform === 'darwin' ? 'Ver no GitHub' : 'Baixar no site', 'primary', () => call('app:update:install')));
   }
 }
@@ -524,7 +524,7 @@ async function renderSettings() {
   const box = document.createElement('div');
   box.append(rowOpt('Twitch', 'Lives, pontos, baú e chat da Twitch.', sw(a.platforms.twitch, (v) => setPlatform('twitch', v))));
   box.append(rowOpt('Kick', 'Lives, pontos e chat da Kick.', sw(a.platforms.kick, (v) => setPlatform('kick', v))));
-  box.append(rowOpt(a.platform !== 'win32' ? 'Iniciar com o sistema' : 'Iniciar com o Windows', 'Abre direto na bandeja, perto do relógio.', sw(a.openAtLogin, async (v) => { S.app = await call('app:autostart', v); renderSettings(); })));
+  box.append(rowOpt(a.platform !== 'win32' ? 'Iniciar com o sistema' : 'Iniciar com o Windows', a.platform === 'darwin' ? 'Abre direto na barra de menus, perto do relógio.' : 'Abre direto na bandeja, perto do relógio.', sw(a.openAtLogin, async (v) => { S.app = await call('app:autostart', v); renderSettings(); })));
   box.append(rowOpt('Versão', `Idleterino ${a.version}`, button('Sair do app', null, () => call('app:quit'))));
   const cel = el('div', 'card');
   cel.append(el('h3', null, '📱 Idleterino no celular'), el('p', 'sub', 'Leve as suas contas do PokeIdle para o Idleterino Android com um QR Code: o celular abre já logado, sem senha.'), button('Levar contas para o celular', 'primary', () => abrirLevarCelular()));

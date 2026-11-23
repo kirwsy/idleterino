@@ -223,14 +223,14 @@ function appState() {
 // O Início mostra uma faixa quando sai versão nova, com o botão "Atualizar agora" (sem precisar
 // sair pela bandeja). Instalador do Windows e AppImage: baixa sozinho e o botão instala e reabre.
 // Portátil e .deb não se atualizam sozinhos: a faixa leva ao site para baixar.
-// No Mac também não (o atualizador exige assinatura paga da Apple): a faixa leva às versões no GitHub.
+// No Mac também não (o atualizador exige assinatura paga da Apple): a faixa leva ao build do Mac no fork.
 const SITE = 'https://viinnisantoos.github.io/idleterino/';
 let update = null; // { state: 'downloading' | 'ready' | 'manual', version, percent }
 function setUpdate(u) { update = u; send('app:state', appState()); updateTray(); }
 const newer = (a, b) => { const x = String(a).split('.').map(Number); const y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; };
 function installUpdate() {
   if (!update) return false;
-  if (update.state === 'manual') { shell.openExternal(isMac ? 'https://github.com/ViinniSantoos/idleterino/releases' : SITE).catch(() => {}); return true; }
+  if (update.state === 'manual') { shell.openExternal(isMac ? 'https://github.com/kirwsy/idleterino/actions/workflows/mac.yml' : SITE).catch(() => {}); return true; }
   if (update.state !== 'ready') return false;
   seg.backupNow(`antes da ${update.version}`);
   app.isQuitting = true;

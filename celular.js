@@ -48,7 +48,8 @@ function ipLocal() {
   for (const [nome, lista] of Object.entries(os.networkInterfaces())) {
     for (const i of lista || []) {
       if (i.family !== 'IPv4' || i.internal) continue;
-      if (/vEthernet|VirtualBox|VMware|WSL|Hyper-V|Loopback|docker|^utun|^bridge|^awdl|^llw/i.test(nome)) continue;
+      if (/vEthernet|VirtualBox|VMware|WSL|Hyper-V|Loopback|docker/i.test(nome)) continue;
+      if (process.platform === 'darwin' && /^(utun|bridge|awdl|llw)/.test(nome)) continue;
       const p = i.address.startsWith('192.168.') ? 0 : i.address.startsWith('10.') ? 1 : /^172\.(1[6-9]|2\d|3[01])\./.test(i.address) ? 2 : 9;
       if (p < 9) todos.push({ ip: i.address, p });
     }
