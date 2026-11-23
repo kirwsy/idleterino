@@ -300,9 +300,14 @@ const userOpened = new WeakSet();
 // No Linux a transparência não existe (a janela apareceria na tela) e o Chromium não congela
 // janela oculta, então lá ela só fica escondida.
 const isLinux = process.platform === 'linux';
+const isMac = process.platform === 'darwin';
 function makeInvisible(win) {
+  // macOS: em tela cheia a janela não muda de tamanho; sai da tela cheia e só então some.
+  if (isMac && win.isFullScreen()) { win.once('leave-full-screen', () => { if (!win.isDestroyed()) makeInvisible(win); }); win.setFullScreen(false); return; }
   userOpened.delete(win);
-  win.setOpacity(0);
+  // macOS: janela 100% transparente pode contar como escondida e pausar o vídeo; 1% não se vê.
+  win.setOpacity(isMac ? 0.01 : 0);
+  if (isMac) win.setHiddenInMissionControl(true);
   win.setIgnoreMouseEvents(true);
   win.setFocusable(false);
   win.setSize(480, 270);
@@ -1123,6 +1128,7 @@ ipcMain.handle('kick:channel:show', (_e, slug) => {
   userOpened.add(win);
   win.webContents.setAudioMuted(false);
   win.setOpacity(1);
+  if (isMac) win.setHiddenInMissionControl(false);
   win.setIgnoreMouseEvents(false);
   win.setFocusable(true);
   win.setSize(960, 600); win.center();

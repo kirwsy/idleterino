@@ -23,6 +23,7 @@ const ORIGINAL_UA = app.userAgentFallback;
 app.userAgentFallback = app.userAgentFallback.replace(/ (Electron|idleterino|Idleterino)\/\S+/g, '');
 
 const isLinux = process.platform === 'linux';
+const isMac = process.platform === 'darwin';
 const ICON = path.join(__dirname, 'build', 'icon.png');
 
 // ---------- Configuração da casca ----------
@@ -117,8 +118,9 @@ function quitApp() { app.isQuitting = true; app.quit(); }
 // Iniciar com o sistema (o portátil roda de uma pasta temporária: vale o .exe original).
 const LOGIN_ITEM = { path: process.env.PORTABLE_EXECUTABLE_FILE || process.execPath, args: ['--hidden'] };
 const autostartFile = () => path.join(process.env.XDG_CONFIG_HOME || path.join(app.getPath('home'), '.config'), 'autostart', 'idleterino.desktop');
-const isOpenAtLogin = () => (isLinux ? fs.existsSync(autostartFile()) : app.getLoginItemSettings(LOGIN_ITEM).openAtLogin);
+const isOpenAtLogin = () => (isLinux ? fs.existsSync(autostartFile()) : app.getLoginItemSettings(isMac ? {} : LOGIN_ITEM).openAtLogin);
 function setOpenAtLogin(on) {
+  if (isMac) return app.setLoginItemSettings({ openAtLogin: on }); // o macOS não aceita caminho nem argumentos
   if (!isLinux) return app.setLoginItemSettings({ ...LOGIN_ITEM, openAtLogin: on });
   const file = autostartFile();
   if (!on) return fs.rmSync(file, { force: true });
@@ -221,13 +223,14 @@ function appState() {
 // O Início mostra uma faixa quando sai versão nova, com o botão "Atualizar agora" (sem precisar
 // sair pela bandeja). Instalador do Windows e AppImage: baixa sozinho e o botão instala e reabre.
 // Portátil e .deb não se atualizam sozinhos: a faixa leva ao site para baixar.
+// No Mac também não (o atualizador exige assinatura paga da Apple): a faixa leva às versões no GitHub.
 const SITE = 'https://viinnisantoos.github.io/idleterino/';
 let update = null; // { state: 'downloading' | 'ready' | 'manual', version, percent }
 function setUpdate(u) { update = u; send('app:state', appState()); updateTray(); }
 const newer = (a, b) => { const x = String(a).split('.').map(Number); const y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; };
 function installUpdate() {
   if (!update) return false;
-  if (update.state === 'manual') { shell.openExternal(SITE).catch(() => {}); return true; }
+  if (update.state === 'manual') { shell.openExternal(isMac ? 'https://github.com/ViinniSantoos/idleterino/releases' : SITE).catch(() => {}); return true; }
   if (update.state !== 'ready') return false;
   seg.backupNow(`antes da ${update.version}`);
   app.isQuitting = true;
@@ -241,7 +244,7 @@ function installUpdate() {
 }
 function setupAutoUpdate() {
   if (!app.isPackaged) return;
-  const auto = !process.env.PORTABLE_EXECUTABLE_FILE && !(isLinux && !process.env.APPIMAGE);
+  const auto = !process.env.PORTABLE_EXECUTABLE_FILE && !(isLinux && !process.env.APPIMAGE) && !isMac;
   if (!auto) {
     // Só confere a versão publicada (o mesmo arquivo que o atualizador lê).
     const feed = `https://github.com/ViinniSantoos/idleterino/releases/latest/download/${isLinux ? 'latest-linux.yml' : 'latest.yml'}`;
@@ -299,7 +302,7 @@ ipcMain.handle('app:seg:versions', () => seg.versions());
 let voltando = false;
 ipcMain.handle('app:seg:rollback', async (_e, version) => {
   if (voltando) return { ok: false, error: 'Já estou fazendo isso.' };
-  if (!seg.canRollback()) return { ok: false, error: 'Voltar de versão funciona no app instalado do Windows. No portátil e no Linux, baixe a versão no GitHub.' };
+  if (!seg.canRollback()) return { ok: false, error: 'Voltar de versão funciona no app instalado do Windows. No portátil, no Linux e no Mac, use a versão do GitHub.' };
   const { response } = await dialog.showMessageBox(mainWin, { type: 'warning', buttons: [`Voltar para a ${version}`, 'Cancelar'], defaultId: 1, cancelId: 1, title: 'Voltar de versão',
     message: `Instalar de volta o Idleterino ${version}?`, detail: `O app baixa a ${version} do GitHub, confere a assinatura, fecha, instala e abre de novo. A versão ${app.getVersion()} fica marcada para não voltar sozinha (quando sair uma correção, ela chega normalmente). Os logins e as configurações continuam.` });
   if (response !== 0) return { ok: false, canceled: true };
@@ -396,6 +399,11 @@ async function abrirLink(id) {
   send('twitch:toast', r.ok ? `🏪 Abrindo o anúncio no Market (${r.nick})…` : `⚠ ${r.erro}`);
 }
 let appPronto = false;
+// macOS: o link idleterino:// chega por evento (não por argumento) e o ícone do Dock reabre a janela escondida.
+if (isMac) {
+  app.on('open-url', (ev, url) => { ev.preventDefault(); abrirLink(linkDe([url])); });
+  app.on('activate', () => showMain());
+}
 app.on('second-instance', (_e, argv) => { showMain(); abrirLink(linkDe(argv)); });
 if (app.isPackaged && !process.env.IDLETERINO_DATA) {
   // Versão de teste (pasta separada) não registra o link: ele é da versão instalada.
@@ -407,7 +415,39 @@ if (app.isPackaged && !process.env.IDLETERINO_DATA) {
 linkPendente = linkDe(process.argv);
 app.setAppUserModelId('com.vinniisaantos.idleterino');
 
+// Barra de menus do macOS: sem o menu Editar, ⌘C/⌘V/⌘A não funcionam nos campos e nos logins.
+function menuDoMac() {
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    { label: 'Idleterino', submenu: [
+      { role: 'about', label: 'Sobre o Idleterino' }, { type: 'separator' },
+      { role: 'hide', label: 'Ocultar Idleterino' }, { role: 'hideOthers', label: 'Ocultar Outros' }, { role: 'unhide', label: 'Mostrar Tudo' }, { type: 'separator' },
+      { label: 'Encerrar Idleterino', accelerator: 'Command+Q', click: quitApp },
+    ] },
+    { label: 'Editar', submenu: [
+      { role: 'undo', label: 'Desfazer' }, { role: 'redo', label: 'Refazer' }, { type: 'separator' },
+      { role: 'cut', label: 'Recortar' }, { role: 'copy', label: 'Copiar' }, { role: 'paste', label: 'Colar' }, { role: 'selectAll', label: 'Selecionar Tudo' },
+    ] },
+    { label: 'Visualizar', submenu: [
+      { role: 'reload', label: 'Recarregar' },
+      { role: 'togglefullscreen', label: 'Tela Cheia', accelerator: 'Control+Command+F' },
+    ] },
+    { label: 'Janela', submenu: [
+      { role: 'minimize', label: 'Minimizar' }, { role: 'close', label: 'Fechar' }, { type: 'separator' },
+      { label: 'Abrir Idleterino', accelerator: 'Command+0', click: showMain },
+    ] },
+  ]));
+}
+// Ícone nítido na barra de menus, com a versão dobrada das telas Retina.
+function iconeBandeja() {
+  const cheio = nativeImage.createFromPath(ICON);
+  if (!isMac) return cheio.resize({ width: 16, height: 16 });
+  const img = nativeImage.createEmpty();
+  for (const escala of [1, 2]) img.addRepresentation({ scaleFactor: escala, width: 18 * escala, height: 18 * escala, buffer: cheio.resize({ width: 18 * escala, height: 18 * escala, quality: 'best' }).toPNG() });
+  return img;
+}
+
 app.whenReady().then(() => {
+  if (isMac) menuDoMac();
   // Antes de qualquer módulo ler ou gravar as configurações: backup e contagem de aberturas.
   const abertura = seg.beforeStart();
   setTimeout(() => seg.markOk(), 2 * 60 * 1000);
@@ -418,7 +458,7 @@ app.whenReady().then(() => {
   session.fromPartition('persist:kick').setUserAgent(ORIGINAL_UA);
   mainWin = new BrowserWindow({
     width: 1440, height: 900, minWidth: 980, minHeight: 620, backgroundColor: '#0a0b10', title: 'Idleterino',
-    show: !process.argv.includes('--hidden'), icon: ICON, autoHideMenuBar: true,
+    show: !(process.argv.includes('--hidden') || (isMac && app.getLoginItemSettings().wasOpenedAtLogin)), icon: ICON, autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false },
   });
   mainWin.setMenuBarVisibility(false);
@@ -430,12 +470,14 @@ app.whenReady().then(() => {
   mainWin.on('close', (e) => {
     if (app.isQuitting) return;
     e.preventDefault();
-    mainWin.hide();
+    // macOS: esconder em tela cheia deixaria um espaço preto; sai da tela cheia antes.
+    if (isMac && mainWin.isFullScreen()) { mainWin.once('leave-full-screen', () => mainWin.hide()); mainWin.setFullScreen(false); } else mainWin.hide();
     if (!config.trayHintShown) {
       config.trayHintShown = true;
       saveConfig();
       notify('O Idleterino continua rodando', isLinux
         ? 'Ele fica na bandeja do sistema. Se o ícone não aparecer, abra o app de novo pelo menu. Para sair de vez, use Sair nas configurações.'
+        : isMac ? 'Ele fica na barra de menus, perto do relógio. Para sair de vez: ⌘Q, ou o ícone da barra de menus > Sair.'
         : 'Ele fica na bandeja, perto do relógio. Para sair de vez: botão direito no ícone > Sair.', showMain);
     }
   });
@@ -444,8 +486,8 @@ app.whenReady().then(() => {
   mainWin.on('query-session-end', () => { app.isQuitting = true; });
   mainWin.on('session-end', () => { app.isQuitting = true; });
 
-  tray = new Tray(nativeImage.createFromPath(ICON).resize({ width: 16, height: 16 }));
-  tray.on('click', showMain);
+  tray = new Tray(iconeBandeja());
+  if (!isMac) tray.on('click', showMain); // no Mac o clique abre o menu do ícone
   updateTray();
   powerMonitor.on('resume', () => { for (const m of Object.values(modules)) if (m.started) m.recoverAfterResume(); });
   // Voltou para o PC (abriu a janela ou desbloqueou a tela): com o modo noite ligado há 4 h, sai o relatório.

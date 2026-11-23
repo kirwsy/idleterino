@@ -40,7 +40,7 @@ function mostrarQrCelular(r) {
   lado.append(el('span', 'sub', 'Quando o celular pedir, digite o PIN:'), pin, tempo, el('span', 'sub', `${r.n} conta(s): ${r.nomes.join(', ')}`), ol,
     el('div', 'tip warn', '🔒 Não mostre este QR nem o PIN para ninguém: juntos, eles dão acesso às suas contas.'));
   meio.append(qr, lado);
-  card.append(meio, el('p', 'small', 'Se o Windows perguntar se o Idleterino pode usar a rede, permita na rede PRIVADA (é a sua Wi-Fi de casa). A conta que entrar no celular sai do PC, igual quando você abre no navegador.'));
+  card.append(meio, el('p', 'small', 'Se o sistema perguntar se o Idleterino pode usar a rede, permita na rede PRIVADA (é a sua Wi-Fi de casa). A conta que entrar no celular sai do PC, igual quando você abre no navegador.'));
   // Plano B: o celular mostrou "Não é possível acessar esse site" (a rede separa os aparelhos, o firewall bloqueou…).
   if (r.codigo) {
     const b = el('details', 'cel-planob');

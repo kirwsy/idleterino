@@ -116,7 +116,7 @@ module.exports = function createExtensions(ctx) {
     try {
       // O tar do próprio Windows (10 e 11) abre .zip; o caminho completo evita pegar outro tar do PATH.
       if (process.platform === 'win32') execFileSync(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe'), ['-xf', path.resolve(zip), '-C', path.resolve(dest)], { windowsHide: true });
-      else execFileSync('unzip', ['-q', '-o', zip, '-d', dest]);
+      else execFileSync(process.platform === 'darwin' ? '/usr/bin/unzip' : 'unzip', ['-q', '-o', zip, '-d', dest]);
     } finally { if (zip !== file) fs.rmSync(zip, { force: true }); }
   }
   // Alguns pacotes trazem tudo dentro de uma subpasta: acha onde está o manifest.json.
@@ -353,6 +353,11 @@ module.exports = function createExtensions(ctx) {
       chromium('Chrome', path.join(L, 'Google', 'Chrome', 'User Data')), chromium('Edge', path.join(L, 'Microsoft', 'Edge', 'User Data')),
       chromium('Brave', path.join(L, 'BraveSoftware', 'Brave-Browser', 'User Data')), chromium('Vivaldi', path.join(L, 'Vivaldi', 'User Data')),
       { name: 'Opera', base: path.join(R, 'Opera Software', 'Opera Stable'), opera: true }, { name: 'Opera GX', base: path.join(R, 'Opera Software', 'Opera GX Stable'), opera: true },
+    ] : process.platform === 'darwin' ? [
+      chromium('Chrome', path.join(H, 'Library', 'Application Support', 'Google', 'Chrome')), chromium('Chromium', path.join(H, 'Library', 'Application Support', 'Chromium')),
+      chromium('Edge', path.join(H, 'Library', 'Application Support', 'Microsoft Edge')), chromium('Brave', path.join(H, 'Library', 'Application Support', 'BraveSoftware', 'Brave-Browser')),
+      chromium('Vivaldi', path.join(H, 'Library', 'Application Support', 'Vivaldi')),
+      { name: 'Opera', base: path.join(H, 'Library', 'Application Support', 'com.operasoftware.Opera'), opera: true }, { name: 'Opera GX', base: path.join(H, 'Library', 'Application Support', 'com.operasoftware.OperaGX'), opera: true },
     ] : [
       chromium('Chrome', path.join(H, '.config', 'google-chrome')), chromium('Chromium', path.join(H, '.config', 'chromium')), chromium('Edge', path.join(H, '.config', 'microsoft-edge')),
       chromium('Brave', path.join(H, '.config', 'BraveSoftware', 'Brave-Browser')), chromium('Vivaldi', path.join(H, '.config', 'vivaldi')), { name: 'Opera', base: path.join(H, '.config', 'opera'), opera: true },

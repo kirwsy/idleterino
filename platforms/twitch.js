@@ -663,6 +663,7 @@ async function claimChest(slug) {
   // Como as lives ocultas: a janela existe na tela (transparente e sem cliques), para a página
   // da Twitch se comportar como uma aba aberta.
   win.setIgnoreMouseEvents(true);
+  if (isMac) { win.setOpacity(0.01); win.setHiddenInMissionControl(true); }
   if (!isLinux) win.showInactive();
   let result = { ok: false };
   try {
@@ -827,11 +828,16 @@ function instrumentWatcher(slug, win) {
 
 const userOpened = new WeakSet();
 const isLinux = process.platform === 'linux';
+const isMac = process.platform === 'darwin';
 // Janela "invisível": existe para o Windows (o vídeo anda de verdade), mas é transparente, não
 // recebe cliques e não aparece na barra de tarefas nem no Alt+Tab.
 function makeInvisible(win) {
+  // macOS: em tela cheia a janela não muda de tamanho; sai da tela cheia e só então some.
+  if (isMac && win.isFullScreen()) { win.once('leave-full-screen', () => { if (!win.isDestroyed()) makeInvisible(win); }); win.setFullScreen(false); return; }
   userOpened.delete(win);
-  win.setOpacity(0);
+  // macOS: janela 100% transparente pode contar como escondida e pausar o vídeo; 1% não se vê.
+  win.setOpacity(isMac ? 0.01 : 0);
+  if (isMac) win.setHiddenInMissionControl(true);
   win.setIgnoreMouseEvents(true);
   win.setFocusable(false);
   win.setSize(480, 270);
@@ -1366,6 +1372,7 @@ ipcMain.handle('twitch:channel:show', (_e, slug) => {
   userOpened.add(win);
   win.webContents.setAudioMuted(false);
   win.setOpacity(1);
+  if (isMac) win.setHiddenInMissionControl(false);
   win.setIgnoreMouseEvents(false);
   win.setFocusable(true);
   win.setSize(960, 600); win.center();

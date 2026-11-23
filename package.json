@@ -11,7 +11,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win",
-    "dist:linux": "electron-builder --linux"
+    "dist:linux": "electron-builder --linux",
+    "dist:mac": "electron-builder --mac --publish never"
   },
   "dependencies": {
     "electron-updater": "^6.6.2",
@@ -90,6 +91,21 @@
     },
     "portable": {
       "artifactName": "Idleterino-portatil.exe"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.utilities",
+      "artifactName": "Idleterino-mac-${arch}.${ext}",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "NSAppSleepDisabled": true,
+        "NSLocalNetworkUsageDescription": "Usado pelo painel Wi-Fi e para levar as contas para o celular."
+      }
     },
     "linux": {
       "target": [

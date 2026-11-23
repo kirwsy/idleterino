@@ -1,6 +1,6 @@
 # Idleterino
 
-App para Windows e Linux que junta as contas do PokeIdle, os pontos da Twitch e os da Kick num só lugar. É leve, organizado e cada opção é escolha do usuário.
+App para Windows, Linux e Mac ([como gerar no Mac](MAC.md)) que junta as contas do PokeIdle, os pontos da Twitch e os da Kick num só lugar. É leve, organizado e cada opção é escolha do usuário.
 
 **Download:** https://viinnisantoos.github.io/idleterino/
 
@@ -34,6 +34,7 @@ npm ci
 npm start
 npm run dist
 npm run dist:linux
+npm run dist:mac
 ```
 
 - `npm start` roda o app.

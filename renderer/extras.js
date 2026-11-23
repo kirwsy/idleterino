@@ -95,7 +95,7 @@ function mostrarRelatorio(rel) {
     nodes.push(el('b', null, 'O que aconteceu'), ul);
   } else nodes.push(el('p', 'ok-line', '✓ Noite perfeita: nenhuma conta caiu nem travou.'));
   const img = () => desenharRelatorio(rel, tot);
-  nodes.push(actionsRow(button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', img())) toast('Imagem copiada. Cole no Discord (Ctrl+V).'); }),
+  nodes.push(actionsRow(button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', img())) toast('Imagem copiada. Cole no Discord (Ctrl+V ou ⌘V).'); }),
     button('💾 Salvar', null, () => call('app:image:save', img(), 'idleterino-bom-dia')), button('Fechar', 'primary', closeModal)));
   openModal(...nodes);
 }
@@ -190,7 +190,7 @@ async function abrirWrapped(dias) {
   const resumo = () => {
     const url = desenharWrapped(w, nome);
     const im = el('img', 'wr-img'); im.src = url;
-    openModal(el('h3', null, `🎬 Seu Wrapped ${doNome}`), im, actionsRow(button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', url)) toast('Imagem copiada. Cole no Discord (Ctrl+V).'); }), button('💾 Salvar', null, () => call('app:image:save', url, `idleterino-wrapped-${nome}`)), button('Fechar', 'primary', closeModal)));
+    openModal(el('h3', null, `🎬 Seu Wrapped ${doNome}`), im, actionsRow(button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', url)) toast('Imagem copiada. Cole no Discord (Ctrl+V ou ⌘V).'); }), button('💾 Salvar', null, () => call('app:image:save', url, `idleterino-wrapped-${nome}`)), button('Fechar', 'primary', closeModal)));
   };
   openModal(el('h3', null, `🎬 Wrapped ${doNome}`), stage, dots, actionsRow(prev, next));
   show();
@@ -238,7 +238,7 @@ async function abrirCartao() {
   const ul = el('div', 'medals');
   for (const [ico, nomeM, ok] of k.lista) { const m = el('span', `medal${ok ? ' on' : ''}`, `${ico} ${nomeM}`); m.title = ok ? 'Conquistada' : 'Ainda não'; ul.append(m); }
   openModal(el('h3', null, '📇 Cartão do Treinador'), im, el('b', null, `Conquistas (${k.feitas.length}/${k.lista.length})`), ul,
-    actionsRow(button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', url)) toast('Cartão copiado. Cole no Discord (Ctrl+V).'); }), button('💾 Salvar', null, () => call('app:image:save', url, `cartao-${nick}`)), button('Fechar', 'primary', closeModal)));
+    actionsRow(button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', url)) toast('Cartão copiado. Cole no Discord (Ctrl+V ou ⌘V).'); }), button('💾 Salvar', null, () => call('app:image:save', url, `cartao-${nick}`)), button('Fechar', 'primary', closeModal)));
 }
 function desenharCartao(nick, i, k, s) {
   const T = tela(1200, 675);
@@ -277,7 +277,7 @@ async function settingsExtras(box) {
   pm.onchange = async () => { S.diario = await call('app:diario:vigia', { paradaMin: Number(pm.value) }); };
   const vg = el('div', 'inline'); vg.append(sw(d.vigia.on, async (v) => { S.diario = await call('app:diario:vigia', { on: v }); }), el('span', 'sub', 'parada há'), pm);
   av.append(rowOpt('Vigia ligado', 'Conta logada sem ganhar XP, conta que caiu ou deslogou e conta que travou.', vg, true));
-  av.append(rowOpt('Aviso no PC', 'A notificação do Windows/Linux.', sw(d.avisos.desktop, (v) => setA({ desktop: v }))));
+  av.append(rowOpt('Aviso no PC', 'A notificação do sistema.', sw(d.avisos.desktop, (v) => setA({ desktop: v }))));
   // ntfy
   const nt = el('div', 'notify-box');
   const ntHead = rowOpt('📱 Aviso no celular (ntfy)', 'App gratuito, sem cadastro. Chega mesmo com a tela bloqueada e no 4G.', sw(d.avisos.ntfyOn, (v) => setA({ ntfyOn: v })), true);
@@ -312,7 +312,7 @@ async function settingsExtras(box) {
   // Painel Wi-Fi
   const pn = el('div', 'card list xsec');
   pn.append(el('h3', null, '📶 Painel no celular (Wi-Fi de casa)'), el('p', 'sub', 'Veja as contas ao vivo no navegador do celular: nível, XP/h, ouro/h, horas e se alguma está parada. Só leitura, com código de acesso, e só no mesmo Wi-Fi.'));
-  pn.append(rowOpt('Painel ligado', d.painel.semRede ? 'Não achei uma rede Wi-Fi/cabo neste PC.' : 'Na primeira vez, o Windows pode perguntar se o Idleterino pode usar a rede: escolha só "Redes privadas".', sw(d.painel.on, async (v) => { S.diario = await call('app:diario:painel', { on: v }); renderSettings(); })));
+  pn.append(rowOpt('Painel ligado', d.painel.semRede ? 'Não achei uma rede Wi-Fi/cabo neste PC.' : 'Na primeira vez, o sistema pode perguntar se o Idleterino pode usar a rede: escolha só "Redes privadas".', sw(d.painel.on, async (v) => { S.diario = await call('app:diario:painel', { on: v }); renderSettings(); })));
   if (d.painel.on) {
     if (d.painel.erro) pn.append(el('p', 'warn-google', `⚠ ${d.painel.erro}`));
     if (d.painel.qr) {
@@ -353,7 +353,7 @@ async function settingsExtras(box) {
     }
     vBtn.textContent = 'Atualizar lista'; vBtn.disabled = false;
   });
-  sg.append(rowOpt('Voltar para a versão anterior', st.canRollback ? 'Baixa do GitHub, confere a assinatura, instala e abre sozinho. A versão com problema não volta sozinha: a correção chega normalmente quando sair.' : 'No app instalado do Windows é com um clique. No portátil e no Linux, baixe a versão anterior em github.com/ViinniSantoos/idleterino/releases.', vBtn), vs);
+  sg.append(rowOpt('Voltar para a versão anterior', st.canRollback ? 'Baixa do GitHub, confere a assinatura, instala e abre sozinho. A versão com problema não volta sozinha: a correção chega normalmente quando sair.' : 'No app instalado do Windows é com um clique. No portátil, no Linux e no Mac, use a versão anterior em github.com/ViinniSantoos/idleterino/releases.', vBtn), vs);
   box.append(sg);
 }
 window.idle.on('app:seg:progress', (p) => { const b = [...document.querySelectorAll('#sec-seguranca button')].find((x) => x.textContent.startsWith('Baixando')); if (b) b.textContent = `Baixando… ${p}%`; });
@@ -487,7 +487,7 @@ function labVeredito(L) {
   nodes.push(labTabela(L), el('p', 'small', 'Ouro bruto, sem descontar as poções. A marca de poção vem da mesma conta da sugestão de hunt.'));
   const img = () => desenharLab(L);
   nodes.push(actionsRow(button('Novo teste', 'ghost', async () => { S.diario = await call('app:diario:lab:clear'); labNovo(); }),
-    button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', img())) toast('Imagem copiada. Cole no Discord (Ctrl+V).'); }), button('💾 Salvar', null, () => call('app:image:save', img(), `laboratorio-${L.nick}`)), button('Fechar', 'primary', () => { closeModal(); renderHome(); })));
+    button('📋 Copiar imagem', null, async () => { if (await call('app:image:copy', img())) toast('Imagem copiada. Cole no Discord (Ctrl+V ou ⌘V).'); }), button('💾 Salvar', null, () => call('app:image:save', img(), `laboratorio-${L.nick}`)), button('Fechar', 'primary', () => { closeModal(); renderHome(); })));
   openModal(...nodes);
 }
 function desenharLab(L) {

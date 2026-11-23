@@ -104,7 +104,7 @@ window.HELP = [
     '4. Desligue em Ajustes a plataforma que você não usa (Twitch ou Kick).',
   ]],
   ['Segurança', 'Minhas contas estão seguras?', [
-    'Os logins ficam só no seu PC, criptografados pelo Windows. Não existe servidor do Idleterino e o app nunca lê nem guarda senhas.',
+    'Os logins ficam só no seu PC, criptografados pelo sistema. Não existe servidor do Idleterino e o app nunca lê nem guarda senhas.',
     'Cada conta tem a sua sessão separada. Baixe o app só pelo site oficial ou pelo GitHub e mantenha um antivírus ligado.',
     'Vai vender ou emprestar o PC? Em Ajustes, use "Apagar todos os logins deste PC".',
   ]],
@@ -112,6 +112,7 @@ window.HELP = [
     'Quando sai versão nova, aparece uma faixa no topo do Início. Ela baixa sozinha e, quando termina, mostra o botão "Atualizar agora": um clique e o app fecha, instala e abre de novo.',
     'Também dá pelo ícone perto do relógio: botão direito > "Atualizar agora".',
     'Na versão 0.1.6 ou antes (sem a faixa): botão direito no ícone perto do relógio > Sair, e abra de novo.',
+    'Mac: a faixa avisa; atualize o código e gere o app de novo (MAC.md).',
     'Versão portátil e .deb (Linux): a faixa avisa e o botão "Baixar no site" abre a página de download.',
   ]],
   ['Início', 'O que aparece no Início?', [
@@ -192,7 +193,7 @@ window.HELP = [
   ]],
   ['Vigia e avisos', 'Como ver as contas no celular sem notificação?', [
     '1. Ajustes > Painel no celular: ligue o painel.',
-    '2. Na primeira vez, o Windows pergunta se o Idleterino pode usar a rede: escolha só "Redes privadas".',
+    '2. Na primeira vez, o sistema pode perguntar se o Idleterino pode usar a rede: escolha só "Redes privadas".',
     '3. Leia o QR code com a câmera do celular, no mesmo Wi-Fi do PC.',
     'É só leitura: nível, XP/h, ouro/h, horas e se alguma conta está parada. Tem código de acesso e não sai da sua casa. "Trocar o código" invalida o link antigo.',
   ]],
@@ -226,7 +227,7 @@ window.HELP = [
     '1. "Restaurar" volta contas, canais, ajustes e extensões como estavam no dia escolhido (os logins não mudam).',
     '2. "Ver versões anteriores" > "Voltar para a 0.x.x": o app baixa a versão do GitHub, confere a assinatura, instala e abre sozinho. A versão com problema não volta sozinha; a correção chega normalmente.',
     'Se a mesma versão fechar sozinha 3 vezes seguidas ao abrir, o próprio app oferece essas saídas.',
-    'No portátil e no Linux, baixe a versão anterior em github.com/ViinniSantoos/idleterino/releases.',
+    'No portátil, no Linux e no Mac, use a versão anterior em github.com/ViinniSantoos/idleterino/releases.',
   ]],
   ['Noite e recap', 'Como funciona o Laboratório de hunts?', [
     '1. No Início, clique em "🧪 Laboratório", escolha a conta e clique em "Começar".',
